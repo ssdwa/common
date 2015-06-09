@@ -149,7 +149,7 @@ public class DataLayerListenerService extends WearableListenerService implements
                 mIds.add(id);
             }
             if (mSensorManager == null) {
-                registerSensor();
+                registerSensor(messageEvent);   //0604
             }
 
             // For service destruction suppression.
@@ -356,7 +356,10 @@ public class DataLayerListenerService extends WearableListenerService implements
     /**
      * センサーを登録する.
      */
-    private synchronized void registerSensor() {
+    private synchronized void registerSensor(final MessageEvent messageEvent) { //0604
+        //get sampling period (us)
+        String samplingPeriodStr = new String(messageEvent.getData()); //0604
+
         GoogleApiClient client = getClient();
         if (client == null || !client.isConnected()) {
             client = new GoogleApiClient.Builder(this).addApi(Wearable.API).build();
@@ -374,7 +377,8 @@ public class DataLayerListenerService extends WearableListenerService implements
         List<Sensor> accelSensors = mSensorManager.getSensorList(Sensor.TYPE_ACCELEROMETER);
         if (accelSensors.size() > 0) {
             mAccelerometer = accelSensors.get(0);
-            mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+//            mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+            mSensorManager.registerListener(this, mAccelerometer, Integer.parseInt(samplingPeriodStr)); //0604
         }
         
         List<Sensor> gyroSensors = mSensorManager.getSensorList(Sensor.TYPE_GYROSCOPE);
